@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { GLView } from "expo-gl";
+import { GLView, ExpoWebGLRenderingContext } from "expo-gl";
 import { Renderer } from "expo-three";
 import {
   Scene,
