@@ -61,7 +61,7 @@ jobs:
 
   build-ios:
     name: Build iOS
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 
@@ -87,6 +87,7 @@ jobs:
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 16' \
             -derivedDataPath build \
+            SWIFT_STRICT_CONCURRENCY=minimal \
             build
 
       - uses: actions/upload-artifact@v4
