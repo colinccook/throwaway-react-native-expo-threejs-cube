@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl";
 import { Renderer } from "expo-three";
 import {
@@ -13,6 +13,20 @@ import {
 
 export default function SpinningCube() {
   const requestIdRef = useRef<number | null>(null);
+  const rendererRef = useRef<Renderer | null>(null);
+  const geometryRef = useRef<BoxGeometry | null>(null);
+  const materialRef = useRef<MeshStandardMaterial | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (requestIdRef.current !== null) {
+        cancelAnimationFrame(requestIdRef.current);
+      }
+      geometryRef.current?.dispose();
+      materialRef.current?.dispose();
+      rendererRef.current?.dispose();
+    };
+  }, []);
 
   const onContextCreate = (gl: ExpoWebGLRenderingContext) => {
     const scene = new Scene();
@@ -27,11 +41,14 @@ export default function SpinningCube() {
 
     const renderer = new Renderer({ gl });
     renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
+    rendererRef.current = renderer;
 
     const geometry = new BoxGeometry(1, 1, 1);
     const material = new MeshStandardMaterial({ color: 0x4a90d9 });
     const cube = new Mesh(geometry, material);
     scene.add(cube);
+    geometryRef.current = geometry;
+    materialRef.current = material;
 
     const directionalLight = new DirectionalLight(0xffffff, 1);
     directionalLight.position.set(1, 1, 1);
