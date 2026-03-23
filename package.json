@@ -1,0 +1,42 @@
+{
+  "name": "throwaway-react-native-expo-threejs-cube",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "jest",
+    "build:web": "npx expo export --platform web"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~55.0.6",
+    "expo": "~55.0.8",
+    "expo-gl": "~55.0.10",
+    "expo-status-bar": "~55.0.4",
+    "expo-three": "^8.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.2",
+    "react-native-web": "~0.21.0",
+    "three": "^0.166.0"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.3.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
+    "@types/react": "~19.2.2",
+    "@types/three": "^0.166.0",
+    "babel-preset-expo": "^55.0.12",
+    "jest": "^30.3.0",
+    "jest-cucumber": "^4.5.0",
+    "jest-expo": "^55.0.11",
+    "react-test-renderer": "^19.2.0",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}
