@@ -45,7 +45,7 @@ export default function SpinningCube() {
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;
       renderer.render(scene, camera);
-      gl.endFrameEXP();
+      gl.endFrameEXP?.();
     };
 
     animate();
