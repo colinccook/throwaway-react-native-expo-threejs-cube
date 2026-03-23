@@ -120,7 +120,8 @@ When extending this project, keep the following in mind:
 - Styles use React Native `StyleSheet` (works on all platforms)
 
 ### Dependency Notes
-- Use `--legacy-peer-deps` when installing packages due to `expo-three` peer dependency constraints on the `three` package version
+- The `three` package version is aligned with `expo-three`'s peer dependency range (`^0.166.0`)
+- Use `--legacy-peer-deps` when installing packages due to other `expo-three` internal peer dependency constraints
 - Run `npx expo install <package>` to ensure Expo-compatible versions
 
 ### GitHub Pages

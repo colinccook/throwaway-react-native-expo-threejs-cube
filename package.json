@@ -20,7 +20,7 @@
     "react-dom": "19.2.0",
     "react-native": "0.83.2",
     "react-native-web": "~0.21.0",
-    "three": "^0.183.2"
+    "three": "^0.166.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.3.0",
@@ -30,7 +30,7 @@
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
-    "@types/three": "^0.183.1",
+    "@types/three": "^0.166.0",
     "babel-preset-expo": "^55.0.12",
     "jest": "^30.3.0",
     "jest-cucumber": "^4.5.0",
