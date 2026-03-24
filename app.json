@@ -11,6 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      "./plugins/withSwiftConcurrencyMinimal"
+    ],
     "ios": {
       "supportsTablet": true
     },
