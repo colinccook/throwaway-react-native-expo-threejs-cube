@@ -15,7 +15,8 @@
       "./plugins/withSwiftConcurrencyMinimal"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.throwaway-react-native-expo-threejs-cube"
     },
     "android": {
       "adaptiveIcon": {
