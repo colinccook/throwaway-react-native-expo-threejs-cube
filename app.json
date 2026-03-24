@@ -11,12 +11,8 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "plugins": [
-      "./plugins/withSwiftConcurrencyMinimal"
-    ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.throwaway-react-native-expo-threejs-cube"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
