@@ -1,6 +1,9 @@
 /** @type {import('jest').Config} */
 module.exports = {
   testEnvironment: "jsdom",
+  moduleNameMapper: {
+    "\\.(scss|sass|css)$": "<rootDir>/__mocks__/styleMock.js",
+  },
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",
