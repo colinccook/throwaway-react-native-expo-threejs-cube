@@ -21,7 +21,8 @@ const ROT_INCREMENT_Y = 0.003;
 
 const CUBE_X = [-4, 0, 4];
 
-/** Vertical page camera keyframes (position + lookAt target) */
+/** Vertical page camera keyframes (position + lookAt target).
+ *  Page 2 (cube focus) is computed dynamically in the render loop based on hT. */
 const PAGE_CAMERAS: { pos: [number, number, number]; target: [number, number, number] }[] = [
   { pos: [12, 2, 0], target: [0, 0, 0] },    // Page 0 — side view
   { pos: [0, 15, 0.001], target: [0, 0, 0] }, // Page 1 — top view

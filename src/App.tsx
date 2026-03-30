@@ -291,12 +291,12 @@ export default function App() {
           />
           <div data-testid="horizontal-sub-dots" className="nav-dots__horizontal">
             {Array.from({ length: TOTAL_CUBES }, (_, i) => {
-              const cubeIndex = TOTAL_CUBES - 1 - i;
+              const reversedCubeIndex = TOTAL_CUBES - 1 - i;
               return (
                 <div
-                  key={cubeIndex}
-                  className={`nav-dots__dot${isOnCubeFocusPage && subX === cubeIndex ? " nav-dots__dot--active" : ""}`}
-                  aria-label={`Cube ${cubeIndex + 1}`}
+                  key={reversedCubeIndex}
+                  className={`nav-dots__dot${isOnCubeFocusPage && subX === reversedCubeIndex ? " nav-dots__dot--active" : ""}`}
+                  aria-label={`Cube ${reversedCubeIndex + 1}`}
                 />
               );
             })}
