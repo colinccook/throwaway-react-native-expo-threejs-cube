@@ -1,6 +1,6 @@
-# React Native Expo Three.js Spinning Cube
+# React Three.js Spinning Cube PWA
 
-A proof-of-concept React Native Expo application that renders a spinning 3D cube using Three.js and TypeScript. The web version is statically hosted on GitHub Pages.
+A Progressive Web App that renders a spinning 3D cube using React, Three.js, TypeScript, and Vite. Statically hosted on GitHub Pages.
 
 ## Screenshot
 
@@ -12,9 +12,10 @@ A proof-of-concept React Native Expo application that renders a spinning 3D cube
 
 ## Tech Stack
 
-- **React Native** via [Expo](https://expo.dev/) (SDK 55)
-- **Three.js** via [expo-three](https://github.com/nicktomlin/expo-three) + [expo-gl](https://docs.expo.dev/versions/latest/sdk/gl-view/)
+- **React 19** with [Vite](https://vite.dev/) for fast development and optimized builds
+- **Three.js** for WebGL 3D rendering
 - **TypeScript** for type safety
+- **PWA** with web app manifest for installability
 - **Jest** + [jest-cucumber](https://github.com/bencompton/jest-cucumber) for BDD testing
 - **GitHub Actions** for CI/CD (test, build, deploy)
 - **GitHub Pages** for static web hosting
@@ -22,21 +23,27 @@ A proof-of-concept React Native Expo application that renders a spinning 3D cube
 ## Project Structure
 
 ```
-├── App.tsx                    # Main app with title and cube container
-├── components/
-│   └── SpinningCube.tsx       # Three.js spinning cube component
+├── src/
+│   ├── main.tsx                # React entry point
+│   ├── App.tsx                 # Main app with title and cube container
+│   ├── components/
+│   │   └── SpinningCube.tsx    # Three.js spinning cube component
+│   └── vite-env.d.ts          # Vite type declarations
+├── public/
+│   ├── favicon.png             # App icon
+│   └── manifest.json           # PWA manifest
 ├── features/
-│   └── spinning-cube.feature  # BDD feature file (Gherkin)
+│   └── spinning-cube.feature   # BDD feature file (Gherkin)
 ├── __tests__/
-│   └── spinning-cube.steps.tsx # BDD step definitions
+│   └── spinning-cube.steps.tsx  # BDD step definitions
 ├── .github/workflows/
-│   ├── test.yml               # Run BDD tests on PRs
-│   ├── build.yml              # Build Android, iOS and web artifacts
-│   └── deploy-pages.yml       # Deploy web build to GitHub Pages
-├── babel.config.js
-├── jest.config.js
-├── tsconfig.json
-└── app.json
+│   ├── test.yml                # Run BDD tests on PRs
+│   ├── build.yml               # Build web artifact
+│   └── deploy-pages.yml        # Deploy web build to GitHub Pages
+├── index.html                  # Vite HTML entry point
+├── vite.config.ts              # Vite configuration
+├── tsconfig.json               # TypeScript configuration
+└── jest.config.cjs             # Jest configuration
 ```
 
 ## Getting Started
@@ -49,20 +56,13 @@ A proof-of-concept React Native Expo application that renders a spinning 3D cube
 ### Install Dependencies
 
 ```bash
-npm install --legacy-peer-deps
+npm install
 ```
 
 ### Run Locally
 
 ```bash
-# Web
-npm run web
-
-# Android (requires Android SDK or Expo Go)
-npm run android
-
-# iOS (requires macOS + Xcode or Expo Go)
-npm run ios
+npm run dev
 ```
 
 ### Run Tests
@@ -71,20 +71,26 @@ npm run ios
 npm test
 ```
 
-### Build for Web
+### Build for Production
 
 ```bash
-npm run build:web
+npm run build
 ```
 
 The output is written to the `dist/` directory.
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
 
 ## CI/CD Pipelines
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
 | **Test** | Pull requests to `main` | Runs BDD tests |
-| **Build** | Push to `main` + PRs | Builds Android APK, iOS simulator app, and web bundle |
+| **Build** | Push to `main` + PRs | Builds web bundle |
 | **Deploy Pages** | Push to `main` | Deploys web build to GitHub Pages |
 
 ## BDD Tests
@@ -105,26 +111,26 @@ Feature: Spinning Cube Display
 When extending this project, keep the following in mind:
 
 ### Adding New 3D Objects
-- Create new components in the `components/` directory following the pattern in `SpinningCube.tsx`
-- Use `expo-gl` for the GL context and `expo-three` for the Three.js renderer bridge
-- Add a `testID` prop to the `GLView` for testability
+- Create new components in `src/components/` following the pattern in `SpinningCube.tsx`
+- Use Three.js `WebGLRenderer` directly — no wrapper libraries needed
+- Add a `data-testid` attribute to the container `<div>` for testability
 
 ### Adding New BDD Tests
 - Write `.feature` files in the `features/` directory using Gherkin syntax
 - Write corresponding `.steps.tsx` files in `__tests__/`
-- Mock `expo-gl` and `expo-three` in tests since WebGL is not available in the test environment
-- Use `@testing-library/react` (not `react-native`) with `jest-expo/web` preset for DOM-based testing
+- Mock `three` in tests since WebGL is not available in the jsdom test environment
+- Use `@testing-library/react` with `jest-environment-jsdom` for DOM-based testing
 
 ### Modifying the App Layout
-- `App.tsx` is the root component; it provides the dark background, title, and cube container
-- Styles use React Native `StyleSheet` (works on all platforms)
+- `src/App.tsx` is the root component; it provides the dark background, title, and cube container
+- Styles use standard React inline `CSSProperties`
 
 ### Dependency Notes
-- The `three` package version is aligned with `expo-three`'s peer dependency range (`^0.166.0`)
-- Use `--legacy-peer-deps` when installing packages due to other `expo-three` internal peer dependency constraints
-- Run `npx expo install <package>` to ensure Expo-compatible versions
+- No `--legacy-peer-deps` needed; all dependencies resolve cleanly
+- Use `npm install <package>` to add new dependencies
 
 ### GitHub Pages
 - The web build is deployed from the `dist/` directory
+- Vite's `base` option is set to the repository name for correct asset paths
 - The deployment workflow runs on push to `main`
 - Ensure GitHub Pages is enabled in repository settings (Settings → Pages → Source: GitHub Actions)

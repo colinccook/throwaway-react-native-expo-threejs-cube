@@ -1,21 +1,25 @@
 import { defineFeature, loadFeature } from "jest-cucumber";
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import App from "../App";
+import App from "../src/App";
 
 const feature = loadFeature("./features/spinning-cube.feature");
 
-jest.mock("expo-gl", () => {
-  const React = require("react");
-  return {
-    GLView: function MockGLView(props: any) {
-      return React.createElement("div", { "data-testid": props.testID, style: props.style });
-    },
-  };
-});
-
-jest.mock("expo-three", () => ({
-  Renderer: jest.fn(),
+jest.mock("three", () => ({
+  Scene: jest.fn(() => ({ add: jest.fn() })),
+  PerspectiveCamera: jest.fn(() => ({ position: { z: 0 } })),
+  WebGLRenderer: jest.fn(() => ({
+    setSize: jest.fn(),
+    setPixelRatio: jest.fn(),
+    render: jest.fn(),
+    dispose: jest.fn(),
+    domElement: document.createElement("canvas"),
+  })),
+  BoxGeometry: jest.fn(() => ({ dispose: jest.fn() })),
+  MeshStandardMaterial: jest.fn(() => ({ dispose: jest.fn() })),
+  Mesh: jest.fn(() => ({ rotation: { x: 0, y: 0 } })),
+  DirectionalLight: jest.fn(() => ({ position: { set: jest.fn() } })),
+  AmbientLight: jest.fn(),
 }));
 
 defineFeature(feature, (test) => {
