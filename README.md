@@ -24,7 +24,7 @@ A Progressive Web App that renders three rotating 3D cubes using React, Three.js
 | 2 | Side | Straight-on side view |
 | 3 | Cube focus | Camera zooms to a cube; swipe **left/right** to move between cubes |
 
-- **Navigation dots** — three vertical dots on the right edge; on the last page the bottom dot sprouts three horizontal sub-dots indicating left/right navigation  
+- **Navigation dots** — four vertical dots on the right edge; on the last page the bottom dot sprouts three horizontal sub-dots indicating left/right navigation  
 - **Assertive, smooth camera tweening** — the camera follows your finger in real time; releasing mid-swipe snaps back or advances based on threshold  
 - **SCSS styling** — global reset and component styles in `src/styles/`
 
