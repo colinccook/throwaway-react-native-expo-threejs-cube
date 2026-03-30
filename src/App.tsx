@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import type * as React from "react";
 import ThreeScene from "./components/ThreeScene";
 import "./styles/app.scss";
 
@@ -172,6 +173,16 @@ export default function App() {
     const prevent = (e: Event) => e.preventDefault();
     window.addEventListener("contextmenu", prevent);
     return () => window.removeEventListener("contextmenu", prevent);
+  }, []);
+
+  // Cancel any in-flight snap animation on unmount
+  useEffect(() => {
+    return () => {
+      if (snapAnimRef.current !== null) {
+        cancelAnimationFrame(snapAnimRef.current);
+        snapAnimRef.current = null;
+      }
+    };
   }, []);
 
   // ── Render ──────────────────────────────────────────────────────────────

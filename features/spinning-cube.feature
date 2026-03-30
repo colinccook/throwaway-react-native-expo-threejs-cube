@@ -22,6 +22,6 @@ Feature: Three Rotating Cubes with Swipable Views
     When I swipe down
     Then the vertical scroll position should be greater than 0
 
-  Scenario: On the cube-focus page the horizontal sub-dots are shown
+  Scenario: The horizontal sub-dots are visible after the app loads
     Given the app has loaded
     Then I should see the horizontal sub-dots

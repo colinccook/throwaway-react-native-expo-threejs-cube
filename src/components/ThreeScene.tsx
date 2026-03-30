@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 import {
   Scene,
   PerspectiveCamera,
@@ -47,9 +47,9 @@ function clamp(v: number, lo: number, hi: number): number {
 
 interface ThreeSceneProps {
   /** Smooth vertical scroll position: 0=default, 1=top-down, 2=side, 3=cube-focus */
-  verticalTRef: React.MutableRefObject<number>;
+  verticalTRef: MutableRefObject<number>;
   /** Smooth horizontal scroll position: 0=cube0, 1=cube1, 2=cube2 */
-  horizontalTRef: React.MutableRefObject<number>;
+  horizontalTRef: MutableRefObject<number>;
   /** Callback to report rendered FPS */
   onFpsUpdate: (fps: number) => void;
 }
@@ -109,6 +109,9 @@ export default function ThreeScene({
     // ── Camera smooth state ───────────────────────────────────────────────
     const smoothCamPos = new Vector3(...PAGE_CAMERAS[0].pos);
     const smoothCamTarget = new Vector3(...PAGE_CAMERAS[0].target);
+    // Reusable temporaries — avoids per-frame GC pressure
+    const tmpPos = new Vector3();
+    const tmpTarget = new Vector3();
 
     // ── Animation loop ───────────────────────────────────────────────────
     let animationId: number;
@@ -149,8 +152,8 @@ export default function ThreeScene({
       }
 
       // Smooth lerp camera toward target (easing = 0.12 per frame ≈ assertive but smooth)
-      smoothCamPos.lerp(new Vector3(...targetPos), 0.12);
-      smoothCamTarget.lerp(new Vector3(...targetLookAt), 0.12);
+      smoothCamPos.lerp(tmpPos.set(...targetPos), 0.12);
+      smoothCamTarget.lerp(tmpTarget.set(...targetLookAt), 0.12);
 
       camera.position.copy(smoothCamPos);
       camera.lookAt(smoothCamTarget);
@@ -195,7 +198,7 @@ export default function ThreeScene({
     <div
       data-testid="three-scene"
       ref={containerRef}
-      style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
+      className="three-scene"
     />
   );
 }

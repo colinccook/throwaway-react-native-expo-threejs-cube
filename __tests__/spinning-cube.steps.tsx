@@ -96,21 +96,24 @@ defineFeature(feature, (test) => {
 
     when("I swipe down", () => {
       const app = screen.getByTestId("app");
+      // Swipe from y=100 to y=600 (delta=500px > 50% of jsdom default innerHeight=768)
+      // ratio = 500/768 ≈ 0.65, Math.round(0.65) = 1 → snaps to page 1 "Top-down"
       fireEvent.touchStart(app, { touches: [{ clientX: 200, clientY: 100 }] });
-      fireEvent.touchMove(app, { touches: [{ clientX: 200, clientY: 400 }] });
+      fireEvent.touchMove(app, { touches: [{ clientX: 200, clientY: 600 }] });
       fireEvent.touchEnd(app);
     });
 
     then("the vertical scroll position should be greater than 0", () => {
-      // After a swipe covering 300px (> 50% threshold on common screen heights),
-      // the page should have advanced — the "Perspective" dot is no longer active
-      // OR the "Top-down" dot became active.
-      // We simply verify that the three-scene is still rendered (no crash).
-      expect(screen.getByTestId("three-scene")).toBeTruthy();
+      // The "Perspective" dot (page 0) should no longer be active
+      // and the "Top-down" dot (page 1) should now be active.
+      const perspectiveDot = screen.getByLabelText("Perspective");
+      const topDownDot = screen.getByLabelText("Top-down");
+      expect(perspectiveDot.classList.contains("nav-dots__dot--active")).toBe(false);
+      expect(topDownDot.classList.contains("nav-dots__dot--active")).toBe(true);
     });
   });
 
-  test("On the cube-focus page the horizontal sub-dots are shown", ({ given, then }) => {
+  test("The horizontal sub-dots are visible after the app loads", ({ given, then }) => {
     given("the app has loaded", () => {
       render(<App />);
     });
