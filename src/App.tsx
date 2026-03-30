@@ -6,16 +6,19 @@ import "./styles/app.scss";
 /** Easing factor for the snap-to-page animation (per requestAnimationFrame tick) */
 const SNAP_EASING_FACTOR = 0.13;
 
-const TOTAL_PAGES = 4; // 0=perspective, 1=top-down, 2=side, 3=cube-focus
+const TOTAL_PAGES = 3; // 0=side, 1=top, 2=cube-focus
 const TOTAL_CUBES = 3;
+const CUBE_FOCUS_PAGE = TOTAL_PAGES - 1; // 2
 
-/** Labels for each page (used in aria / accessible context) */
-const PAGE_LABELS = ["Perspective", "Top-down", "Side", "Cube focus"];
+/** Titles for vertical pages (non-cube) */
+const PAGE_TITLES = ["Side view", "Top view"];
+/** Titles for horizontal cube sub-pages */
+const CUBE_TITLES = ["Cube 1 view", "Cube 2 view", "Cube 3 view"];
 
 export default function App() {
   const [fps, setFps] = useState(0);
-  const [pageY, setPageY] = useState(0);   // settled vertical page index (0-3)
-  const [subX, setSubX] = useState(0);     // settled cube index (0-2) for page 3
+  const [pageY, setPageY] = useState(0);   // settled vertical page index (0-2)
+  const [subX, setSubX] = useState(0);     // settled cube index (0-2) for page 2
 
   // Live smooth values read by the Three.js render loop every frame
   const verticalTRef = useRef<number>(0);
@@ -92,13 +95,13 @@ export default function App() {
       }
 
       if (g.axis === "vertical") {
-        // Swiping down (dy > 0) advances pages (0 → 1 → 2 → 3)
-        const ratio = dy / window.innerHeight;
+        // Swiping up (dy < 0) advances pages (TikTok-style: 0 → 1 → 2)
+        const ratio = -dy / window.innerHeight;
         const raw = g.startPageY + ratio;
         const clamped = Math.max(0, Math.min(TOTAL_PAGES - 1, raw));
         verticalTRef.current = clamped;
         targetVRef.current = clamped;
-      } else if (g.axis === "horizontal" && pageY === 3) {
+      } else if (g.axis === "horizontal" && pageY === CUBE_FOCUS_PAGE) {
         // Horizontal only on cube-focus page; swiping left (dx < 0) advances
         const ratio = -dx / window.innerWidth;
         const raw = g.startSubX + ratio;
@@ -185,8 +188,38 @@ export default function App() {
     };
   }, []);
 
+  // ── Title overlay animation loop ──────────────────────────────────────
+  const titleSlideRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    let animId: number;
+
+    const update = () => {
+      animId = requestAnimationFrame(update);
+      const vT = verticalTRef.current;
+      const hT = horizontalTRef.current;
+
+      // Page titles (Side view, Top view)
+      for (let i = 0; i < PAGE_TITLES.length; i++) {
+        const el = titleSlideRefs.current[i];
+        if (el) el.style.transform = `translateY(${(i - vT) * 100}%)`;
+      }
+
+      // Cube titles (Cube 1/2/3 view) — at vertical position CUBE_FOCUS_PAGE
+      for (let j = 0; j < CUBE_TITLES.length; j++) {
+        const el = titleSlideRefs.current[PAGE_TITLES.length + j];
+        if (el) {
+          el.style.transform = `translate(${(j - hT) * 100}%, ${(CUBE_FOCUS_PAGE - vT) * 100}%)`;
+        }
+      }
+    };
+
+    animId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(animId);
+  }, [verticalTRef, horizontalTRef]);
+
   // ── Render ──────────────────────────────────────────────────────────────
-  const isOnCubeFocusPage = pageY === 3;
+  const isOnCubeFocusPage = pageY === CUBE_FOCUS_PAGE;
 
   return (
     <div
@@ -211,36 +244,62 @@ export default function App() {
         {fps}
       </div>
 
-      {/* Navigation dots */}
+      {/* Page title overlay */}
+      <div data-testid="page-title" className="page-title">
+        {PAGE_TITLES.map((title, i) => (
+          <div
+            key={title}
+            ref={el => { titleSlideRefs.current[i] = el; }}
+            className="page-title__slide"
+            data-testid={`page-title-${i}`}
+          >
+            {title}
+          </div>
+        ))}
+        {CUBE_TITLES.map((title, j) => (
+          <div
+            key={title}
+            ref={el => { titleSlideRefs.current[PAGE_TITLES.length + j] = el; }}
+            className="page-title__slide"
+            data-testid={`page-title-${PAGE_TITLES.length + j}`}
+          >
+            {title}
+          </div>
+        ))}
+      </div>
+
+      {/* Navigation dots — 3 vertical dots, bottom dot has horizontal sub-dots */}
       <nav
         data-testid="nav-dots"
         className="nav-dots"
         aria-label="Page navigation"
       >
-        {Array.from({ length: TOTAL_PAGES - 1 }, (_, i) => (
+        {PAGE_TITLES.map((title, i) => (
           <div key={i} className="nav-dots__item">
             <div
               className={`nav-dots__dot${pageY === i ? " nav-dots__dot--active" : ""}`}
-              aria-label={PAGE_LABELS[i]}
+              aria-label={title}
             />
           </div>
         ))}
 
-        {/* Last dot — vertical position 3 — with optional horizontal sub-dots */}
+        {/* Bottom dot — cube focus — with horizontal sub-dots */}
         <div className="nav-dots__item">
           <div
             className={`nav-dots__dot${isOnCubeFocusPage ? " nav-dots__dot--active" : ""}`}
-            aria-label={PAGE_LABELS[3]}
+            aria-label="Cube focus"
           />
-          {/* Horizontal sub-dots always visible so user knows they exist */}
-          <div className="nav-dots__horizontal">
-            {Array.from({ length: TOTAL_CUBES }, (_, i) => (
-              <div
-                key={i}
-                className={`nav-dots__dot${isOnCubeFocusPage && subX === i ? " nav-dots__dot--active" : ""}`}
-                aria-label={`Cube ${i + 1}`}
-              />
-            ))}
+          <div data-testid="horizontal-sub-dots" className="nav-dots__horizontal">
+            {Array.from({ length: TOTAL_CUBES }, (_, i) => {
+              const cubeIndex = TOTAL_CUBES - 1 - i;
+              return (
+                <div
+                  key={cubeIndex}
+                  className={`nav-dots__dot${isOnCubeFocusPage && subX === cubeIndex ? " nav-dots__dot--active" : ""}`}
+                  aria-label={`Cube ${cubeIndex + 1}`}
+                />
+              );
+            })}
           </div>
         </div>
       </nav>
