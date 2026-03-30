@@ -60,7 +60,7 @@
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   z-index: 100;
   pointer-events: none;
@@ -68,7 +68,7 @@
   &__item {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     gap: 6px;
   }
 
