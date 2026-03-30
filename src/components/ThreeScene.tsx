@@ -21,12 +21,11 @@ const ROT_INCREMENT_Y = 0.003;
 
 const CUBE_X = [-4, 0, 4];
 
-/** Vertical page camera keyframes (position + lookAt target) */
+/** Vertical page camera keyframes (position + lookAt target).
+ *  Page 2 (cube focus) is computed dynamically in the render loop based on hT. */
 const PAGE_CAMERAS: { pos: [number, number, number]; target: [number, number, number] }[] = [
-  { pos: [6, 4, 8], target: [0, 0, 0] },    // Page 0 — perspective (default)
-  { pos: [0, 15, 0.001], target: [0, 0, 0] }, // Page 1 — top-down
-  { pos: [12, 2, 0], target: [0, 0, 0] },    // Page 2 — side view
-  { pos: [0, 0, 6], target: [0, 0, 0] },     // Page 3 — cube focus (updated per-frame via hT)
+  { pos: [12, 2, 0], target: [0, 0, 0] },    // Page 0 — side view
+  { pos: [0, 15, 0.001], target: [0, 0, 0] }, // Page 1 — top view
 ];
 
 function lerp(a: number, b: number, t: number): number {
@@ -46,7 +45,7 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 interface ThreeSceneProps {
-  /** Smooth vertical scroll position: 0=default, 1=top-down, 2=side, 3=cube-focus */
+  /** Smooth vertical scroll position: 0=side, 1=top, 2=cube-focus */
   verticalTRef: MutableRefObject<number>;
   /** Smooth horizontal scroll position: 0=cube0, 1=cube1, 2=cube2 */
   horizontalTRef: MutableRefObject<number>;
@@ -126,29 +125,26 @@ export default function ThreeScene({
       });
 
       // ── Compute target camera from scroll state ───────────────────────
-      const vT = clamp(verticalTRef.current, 0, 3);
+      const vT = clamp(verticalTRef.current, 0, 2);
       const hT = clamp(horizontalTRef.current, 0, 2);
 
       let targetPos: [number, number, number];
       let targetLookAt: [number, number, number];
 
-      if (vT <= 2) {
-        // Lerp between page cameras 0→1→2
-        const seg = Math.floor(vT);
-        const t = vT - seg;
-        const camA = PAGE_CAMERAS[seg];
-        const camB = PAGE_CAMERAS[seg + 1];
-        targetPos = lerpV3(camA.pos, camB.pos, t);
-        targetLookAt = lerpV3(camA.target, camB.target, t);
+      if (vT <= 1) {
+        // Lerp between side view (page 0) and top view (page 1)
+        const t = vT;
+        targetPos = lerpV3(PAGE_CAMERAS[0].pos, PAGE_CAMERAS[1].pos, t);
+        targetLookAt = lerpV3(PAGE_CAMERAS[0].target, PAGE_CAMERAS[1].target, t);
       } else {
-        // vT 2→3: lerp from side-view to cube-focus
-        const t = vT - 2; // 0..1
+        // vT 1→2: lerp from top view to cube-focus
+        const t = vT - 1; // 0..1
         const cubeX = lerp(CUBE_X[0], CUBE_X[2], hT / 2);
-        const page3Pos: [number, number, number] = [cubeX, 0, 6];
-        const page3Target: [number, number, number] = [cubeX, 0, 0];
+        const cubeFocusPos: [number, number, number] = [cubeX, 0, 6];
+        const cubeFocusTarget: [number, number, number] = [cubeX, 0, 0];
 
-        targetPos = lerpV3(PAGE_CAMERAS[2].pos, page3Pos, t);
-        targetLookAt = lerpV3(PAGE_CAMERAS[2].target, page3Target, t);
+        targetPos = lerpV3(PAGE_CAMERAS[1].pos, cubeFocusPos, t);
+        targetLookAt = lerpV3(PAGE_CAMERAS[1].target, cubeFocusTarget, t);
       }
 
       // Smooth lerp camera toward target (easing = 0.12 per frame ≈ assertive but smooth)

@@ -15,16 +15,16 @@ A Progressive Web App that renders three rotating 3D cubes using React, Three.js
 - **Full-screen canvas** — no white borders, scroll locked, pinch-zoom disabled  
 - **Three rotating cubes** — each cube rotates at a slightly different speed  
 - **FPS counter** — small monospace number in the top-left corner  
-- **Four swipable camera views** (swipe down to advance, swipe up to go back):
+- **Three swipable camera views** (swipe up to advance, swipe down to go back):
 
 | Page | View | Description |
 |------|------|-------------|
-| 0 | Perspective *(default)* | Angled view of all three cubes |
-| 1 | Top-down | Bird's-eye overhead view |
-| 2 | Side | Straight-on side view |
-| 3 | Cube focus | Camera zooms to a cube; swipe **left/right** to move between cubes |
+| 0 | Side view *(default)* | Straight-on side view of all three cubes |
+| 1 | Top view | Bird's-eye overhead view |
+| 2 | Cube focus | Camera zooms to a cube; swipe **left/right** to move between cubes |
 
-- **Navigation dots** — four vertical dots on the right edge; on the last page the bottom dot sprouts three horizontal sub-dots indicating left/right navigation  
+- **Page title overlay** — white text in the top-left corner showing the current view name; animates up/down with vertical swipes and left/right with horizontal swipes on the cube focus page  
+- **Navigation dots** — three vertical dots on the right edge; the bottom dot has three horizontal sub-dots indicating left/right cube navigation  
 - **Assertive, smooth camera tweening** — the camera follows your finger in real time; releasing mid-swipe snaps back or advances based on threshold  
 - **SCSS styling** — global reset and component styles in `src/styles/`
 
@@ -50,7 +50,7 @@ A Progressive Web App that renders three rotating 3D cubes using React, Three.js
 │   │   └── SpinningCube.tsx    # (legacy) Original single-cube component
 │   ├── styles/
 │   │   ├── global.scss         # CSS reset, overflow:hidden, touch-action:none
-│   │   └── app.scss            # App layout, nav-dots, fps-counter styles
+│   │   └── app.scss            # App layout, nav-dots, fps-counter, page-title styles
 │   └── vite-env.d.ts           # Vite type declarations
 ├── public/
 │   ├── favicon.png             # App icon
@@ -128,9 +128,12 @@ Feature: Three Rotating Cubes with Swipable Views
   Scenario: The three-scene canvas fills the entire screen
   Scenario: An FPS counter is visible in the top-left corner
   Scenario: Navigation dots are visible on the right
-  Scenario: The default view is the perspective view
-  Scenario: Swiping down advances to the top-down view
-  Scenario: On the cube-focus page the horizontal sub-dots are shown
+  Scenario: There are exactly 3 vertical navigation dots
+  Scenario: The default view is the side view
+  Scenario: Swiping up advances to the top view
+  Scenario: The horizontal sub-dots are visible after the app loads
+  Scenario: The page title overlay is visible
+  Scenario: The horizontal sub-dots are rendered in reversed order
 ```
 
 ## Instructions for Future Prompting
@@ -141,14 +144,13 @@ When extending this project, keep the following in mind:
 
 ### Camera Views
 
-The `ThreeScene` component accepts `verticalTRef` (0–3) and `horizontalTRef` (0–2) as `MutableRefObject<number>`. The render loop reads these refs every frame and smoothly lerps the camera:
+The `ThreeScene` component accepts `verticalTRef` (0–2) and `horizontalTRef` (0–2) as `MutableRefObject<number>`. The render loop reads these refs every frame and smoothly lerps the camera:
 
 | `verticalTRef` | Camera |
 |---|---|
-| 0 | Perspective (default) |
-| 1 | Top-down |
-| 2 | Side |
-| 3 + `horizontalTRef` (0–2) | Focus on cube 0/1/2 |
+| 0 | Side view (default) |
+| 1 | Top view |
+| 2 + `horizontalTRef` (0–2) | Focus on cube 0/1/2 |
 
 ### Adding New 3D Objects
 

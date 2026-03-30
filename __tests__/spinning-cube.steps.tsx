@@ -77,39 +77,56 @@ defineFeature(feature, (test) => {
     });
   });
 
-  test("The default view is the perspective view", ({ given, then }) => {
+  test("There are exactly 3 vertical navigation dots", ({ given, then }) => {
+    given("the app has loaded", () => {
+      render(<App />);
+    });
+
+    then("I should see 3 vertical navigation dots", () => {
+      const navDots = screen.getByTestId("nav-dots");
+      const items = navDots.querySelectorAll(".nav-dots__item");
+      expect(items.length).toBe(3);
+    });
+  });
+
+  test("The default view is the side view", ({ given, then, and }) => {
     given("the app has loaded", () => {
       render(<App />);
     });
 
     then("the vertical scroll position should be 0", () => {
-      // The app starts on page 0 — nav-dots aria-label for page 0 dot is "Perspective"
-      const dot = screen.getByLabelText("Perspective");
+      // The app starts on page 0 — nav-dots aria-label for page 0 dot is "Side view"
+      const dot = screen.getByLabelText("Side view");
       expect(dot.classList.contains("nav-dots__dot--active")).toBe(true);
+    });
+
+    and(/^the page title should show "(.+)"$/, (expectedTitle: string) => {
+      const titleEl = screen.getByTestId("page-title-0");
+      expect(titleEl.textContent).toBe(expectedTitle);
     });
   });
 
-  test("Swiping down advances to the top-down view", ({ given, when, then }) => {
+  test("Swiping up advances to the top view", ({ given, when, then }) => {
     given("the app has loaded", () => {
       render(<App />);
     });
 
-    when("I swipe down", () => {
+    when("I swipe up", () => {
       const app = screen.getByTestId("app");
-      // Swipe from y=100 to y=600 (delta=500px > 50% of jsdom default innerHeight=768)
-      // ratio = 500/768 ≈ 0.65, Math.round(0.65) = 1 → snaps to page 1 "Top-down"
-      fireEvent.touchStart(app, { touches: [{ clientX: 200, clientY: 100 }] });
-      fireEvent.touchMove(app, { touches: [{ clientX: 200, clientY: 600 }] });
+      // Swipe up: from y=600 to y=100 (delta=-500px, negated ratio = 500/768 ≈ 0.65)
+      // Math.round(0.65) = 1 → snaps to page 1 "Top view"
+      fireEvent.touchStart(app, { touches: [{ clientX: 200, clientY: 600 }] });
+      fireEvent.touchMove(app, { touches: [{ clientX: 200, clientY: 100 }] });
       fireEvent.touchEnd(app);
     });
 
     then("the vertical scroll position should be greater than 0", () => {
-      // The "Perspective" dot (page 0) should no longer be active
-      // and the "Top-down" dot (page 1) should now be active.
-      const perspectiveDot = screen.getByLabelText("Perspective");
-      const topDownDot = screen.getByLabelText("Top-down");
-      expect(perspectiveDot.classList.contains("nav-dots__dot--active")).toBe(false);
-      expect(topDownDot.classList.contains("nav-dots__dot--active")).toBe(true);
+      // The "Side view" dot (page 0) should no longer be active
+      // and the "Top view" dot (page 1) should now be active.
+      const sideDot = screen.getByLabelText("Side view");
+      const topDot = screen.getByLabelText("Top view");
+      expect(sideDot.classList.contains("nav-dots__dot--active")).toBe(false);
+      expect(topDot.classList.contains("nav-dots__dot--active")).toBe(true);
     });
   });
 
@@ -119,9 +136,41 @@ defineFeature(feature, (test) => {
     });
 
     then("I should see the horizontal sub-dots", () => {
-      // The horizontal sub-dots container is always rendered (visible as a hint)
-      const horizontalDots = document.querySelector(".nav-dots__horizontal");
+      const horizontalDots = screen.getByTestId("horizontal-sub-dots");
       expect(horizontalDots).toBeTruthy();
+    });
+  });
+
+  test("The page title overlay is visible", ({ given, then }) => {
+    given("the app has loaded", () => {
+      render(<App />);
+    });
+
+    then("I should see the page title overlay", () => {
+      const titleOverlay = screen.getByTestId("page-title");
+      expect(titleOverlay).toBeTruthy();
+      // All 5 title slides should be present
+      expect(screen.getByTestId("page-title-0").textContent).toBe("Side view");
+      expect(screen.getByTestId("page-title-1").textContent).toBe("Top view");
+      expect(screen.getByTestId("page-title-2").textContent).toBe("Cube 1 view");
+      expect(screen.getByTestId("page-title-3").textContent).toBe("Cube 2 view");
+      expect(screen.getByTestId("page-title-4").textContent).toBe("Cube 3 view");
+    });
+  });
+
+  test("The horizontal sub-dots are rendered in reversed order", ({ given, then }) => {
+    given("the app has loaded", () => {
+      render(<App />);
+    });
+
+    then("the horizontal sub-dots should be in reversed cube order", () => {
+      const horizontalDots = screen.getByTestId("horizontal-sub-dots");
+      const dots = horizontalDots.querySelectorAll(".nav-dots__dot");
+      // Dots are rendered in reversed order: Cube 3, Cube 2, Cube 1 (left to right)
+      expect(dots.length).toBe(3);
+      expect(dots[0].getAttribute("aria-label")).toBe("Cube 3");
+      expect(dots[1].getAttribute("aria-label")).toBe("Cube 2");
+      expect(dots[2].getAttribute("aria-label")).toBe("Cube 1");
     });
   });
 });
