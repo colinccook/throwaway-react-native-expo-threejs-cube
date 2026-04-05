@@ -45,11 +45,18 @@
     height: 1.6em;
     display: flex;
     align-items: center;
-    color: white;
+    font-family: "Orbitron", monospace, sans-serif;
     font-size: 1.25rem;
     font-weight: 600;
     white-space: nowrap;
-    will-change: transform;
+    will-change: transform, opacity;
+    color: #00e5ff;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-shadow:
+      0 0 7px rgba(0, 229, 255, 0.7),
+      0 0 15px rgba(0, 229, 255, 0.4),
+      0 0 30px rgba(0, 229, 255, 0.2);
   }
 }
 
@@ -76,12 +83,12 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.35);
-    transition: background 0.3s ease, transform 0.3s ease;
+    background: rgba(0, 229, 255, 0.2);
+    transition: transform 0.3s ease;
     flex-shrink: 0;
 
     &--active {
-      background: rgba(255, 255, 255, 0.92);
+      animation: dot-strobe 2s ease-in-out infinite;
       transform: scale(1.25);
     }
   }
@@ -96,5 +103,18 @@
       width: 5px;
       height: 5px;
     }
+  }
+}
+
+@keyframes dot-strobe {
+  0%,
+  100% {
+    background: rgba(0, 229, 255, 0.3);
+    box-shadow: none;
+  }
+
+  50% {
+    background: rgba(0, 229, 255, 0.95);
+    box-shadow: 0 0 6px rgba(0, 229, 255, 0.6);
   }
 }

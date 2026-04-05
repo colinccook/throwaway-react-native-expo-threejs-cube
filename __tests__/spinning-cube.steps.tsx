@@ -5,6 +5,16 @@ import App from "../src/App";
 
 const feature = loadFeature("./features/spinning-cube.feature");
 
+// ── Audio mock ──────────────────────────────────────────────────────────────
+jest.mock("../src/audio/sfx", () => ({
+  ensureAudioContext: jest.fn(),
+  playBeep: jest.fn(),
+  playSwish: jest.fn(),
+  startSwipeSound: jest.fn(),
+  updateSwipeSound: jest.fn(),
+  stopSwipeSound: jest.fn(),
+}));
+
 // ── Three.js mock ──────────────────────────────────────────────────────────
 jest.mock("three", () => {
   const mockVector3 = {
@@ -171,6 +181,48 @@ defineFeature(feature, (test) => {
       expect(dots[0].getAttribute("aria-label")).toBe("Cube 3");
       expect(dots[1].getAttribute("aria-label")).toBe("Cube 2");
       expect(dots[2].getAttribute("aria-label")).toBe("Cube 1");
+    });
+  });
+
+  test("The page title uses a sci-fi font class", ({ given, then }) => {
+    given("the app has loaded", () => {
+      render(<App />);
+    });
+
+    then("the page title slides should exist for sci-fi styling", () => {
+      const slide = screen.getByTestId("page-title-0");
+      expect(slide.classList.contains("page-title__slide")).toBe(true);
+    });
+  });
+
+  test("The active navigation dot has the strobing class", ({ given, then }) => {
+    given("the app has loaded", () => {
+      render(<App />);
+    });
+
+    then("the active dot should have the active modifier class", () => {
+      const dot = screen.getByLabelText("Side view");
+      expect(dot.classList.contains("nav-dots__dot--active")).toBe(true);
+    });
+  });
+
+  test("Swipe sounds are triggered during drag gestures", ({ given, when, then }) => {
+    given("the app has loaded", () => {
+      render(<App />);
+    });
+
+    when("I begin a swipe gesture", () => {
+      const app = screen.getByTestId("app");
+      fireEvent.touchStart(app, { touches: [{ clientX: 200, clientY: 600 }] });
+      fireEvent.touchMove(app, { touches: [{ clientX: 200, clientY: 400 }] });
+      fireEvent.touchEnd(app);
+    });
+
+    then("the swipe sound functions should have been called", () => {
+      const sfx = require("../src/audio/sfx");
+      expect(sfx.ensureAudioContext).toHaveBeenCalled();
+      expect(sfx.startSwipeSound).toHaveBeenCalled();
+      expect(sfx.stopSwipeSound).toHaveBeenCalled();
     });
   });
 });

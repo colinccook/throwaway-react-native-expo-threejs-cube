@@ -38,3 +38,16 @@ Feature: Three Rotating Cubes with Swipable Views
   Scenario: The horizontal sub-dots are rendered in reversed order
     Given the app has loaded
     Then the horizontal sub-dots should be in reversed cube order
+
+  Scenario: The page title uses a sci-fi font class
+    Given the app has loaded
+    Then the page title slides should exist for sci-fi styling
+
+  Scenario: The active navigation dot has the strobing class
+    Given the app has loaded
+    Then the active dot should have the active modifier class
+
+  Scenario: Swipe sounds are triggered during drag gestures
+    Given the app has loaded
+    When I begin a swipe gesture
+    Then the swipe sound functions should have been called

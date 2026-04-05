@@ -1,6 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type * as React from "react";
 import ThreeScene from "./components/ThreeScene";
+import {
+  ensureAudioContext,
+  playBeep,
+  startSwipeSound,
+  updateSwipeSound,
+  stopSwipeSound,
+} from "./audio/sfx";
 import "./styles/app.scss";
 
 /** Easing factor for the snap-to-page animation (per requestAnimationFrame tick) */
@@ -65,10 +72,12 @@ export default function App() {
 
   const onDragStart = useCallback(
     (clientX: number, clientY: number) => {
+      ensureAudioContext();
       if (snapAnimRef.current !== null) {
         cancelAnimationFrame(snapAnimRef.current);
         snapAnimRef.current = null;
       }
+      startSwipeSound();
       gestureRef.current = {
         active: true,
         startX: clientX,
@@ -101,6 +110,7 @@ export default function App() {
         const clamped = Math.max(0, Math.min(TOTAL_PAGES - 1, raw));
         verticalTRef.current = clamped;
         targetVRef.current = clamped;
+        updateSwipeSound(Math.abs(ratio));
       } else if (g.axis === "horizontal" && pageY === CUBE_FOCUS_PAGE) {
         // Horizontal only on cube-focus page; swiping left (dx < 0) advances
         const ratio = -dx / window.innerWidth;
@@ -108,6 +118,7 @@ export default function App() {
         const clamped = Math.max(0, Math.min(TOTAL_CUBES - 1, raw));
         horizontalTRef.current = clamped;
         targetHRef.current = clamped;
+        updateSwipeSound(Math.abs(ratio));
       }
     },
     [pageY]
@@ -118,20 +129,25 @@ export default function App() {
     if (!g.active) return;
     g.active = false;
 
+    let didTransition = false;
+
     if (g.axis === "vertical") {
       const snapped = Math.round(
         Math.max(0, Math.min(TOTAL_PAGES - 1, verticalTRef.current))
       );
+      didTransition = snapped !== g.startPageY;
       targetVRef.current = snapped;
       setPageY(snapped);
     } else if (g.axis === "horizontal") {
       const snapped = Math.round(
         Math.max(0, Math.min(TOTAL_CUBES - 1, horizontalTRef.current))
       );
+      didTransition = snapped !== g.startSubX;
       targetHRef.current = snapped;
       setSubX(snapped);
     }
 
+    stopSwipeSound(didTransition);
     runSnapAnimation();
   }, [runSnapAnimation]);
 
@@ -202,14 +218,22 @@ export default function App() {
       // Page titles (Side view, Top view)
       for (let i = 0; i < PAGE_TITLES.length; i++) {
         const el = titleSlideRefs.current[i];
-        if (el) el.style.transform = `translateY(${(i - vT) * 100}%)`;
+        if (el) {
+          const dist = Math.abs(i - vT);
+          el.style.transform = `translateY(${(i - vT) * 100}%)`;
+          el.style.opacity = String(Math.max(0, 1 - dist * 2.5));
+        }
       }
 
       // Cube titles (Cube 1/2/3 view) — at vertical position CUBE_FOCUS_PAGE
       for (let j = 0; j < CUBE_TITLES.length; j++) {
         const el = titleSlideRefs.current[PAGE_TITLES.length + j];
         if (el) {
+          const vDist = Math.abs(CUBE_FOCUS_PAGE - vT);
+          const hDist = Math.abs(j - hT);
+          const dist = Math.max(vDist, hDist);
           el.style.transform = `translate(${(j - hT) * 100}%, ${(CUBE_FOCUS_PAGE - vT) * 100}%)`;
+          el.style.opacity = String(Math.max(0, 1 - dist * 2.5));
         }
       }
     };
@@ -217,6 +241,64 @@ export default function App() {
     animId = requestAnimationFrame(update);
     return () => cancelAnimationFrame(animId);
   }, [verticalTRef, horizontalTRef]);
+
+  // ── Typing reveal animation (clip-path + beeps) ───────────────────────
+  const typingDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    // Clear any running typing animation
+    if (typingDelayRef.current) {
+      clearTimeout(typingDelayRef.current);
+      typingDelayRef.current = null;
+    }
+    if (typingIntervalRef.current) {
+      clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+
+    const activeIdx =
+      pageY < CUBE_FOCUS_PAGE ? pageY : PAGE_TITLES.length + subX;
+    const el = titleSlideRefs.current[activeIdx];
+    if (!el) return;
+
+    const text =
+      pageY < CUBE_FOCUS_PAGE ? PAGE_TITLES[pageY] : CUBE_TITLES[subX];
+    const totalChars = text.length;
+
+    // Start fully clipped (hidden)
+    el.style.clipPath = "inset(0 100% 0 0)";
+
+    // Brief delay so the snap animation can progress before typing begins
+    typingDelayRef.current = setTimeout(() => {
+      let charIdx = 0;
+
+      typingIntervalRef.current = setInterval(() => {
+        charIdx++;
+        const pct = Math.max(0, (1 - charIdx / totalChars) * 100);
+        el.style.clipPath = `inset(0 ${pct}% 0 0)`;
+        playBeep(charIdx);
+
+        if (charIdx >= totalChars) {
+          if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+          typingIntervalRef.current = null;
+          el.style.clipPath = "none";
+        }
+      }, 55);
+    }, 150);
+
+    return () => {
+      if (typingDelayRef.current) {
+        clearTimeout(typingDelayRef.current);
+        typingDelayRef.current = null;
+      }
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+        typingIntervalRef.current = null;
+      }
+      if (el) el.style.clipPath = "none";
+    };
+  }, [pageY, subX]);
 
   // ── Render ──────────────────────────────────────────────────────────────
   const isOnCubeFocusPage = pageY === CUBE_FOCUS_PAGE;
