@@ -168,19 +168,19 @@ defineFeature(feature, (test) => {
     });
   });
 
-  test("The horizontal sub-dots are rendered in reversed order", ({ given, then }) => {
+  test("The horizontal sub-dots are rendered in normal order", ({ given, then }) => {
     given("the app has loaded", () => {
       render(<App />);
     });
 
-    then("the horizontal sub-dots should be in reversed cube order", () => {
+    then("the horizontal sub-dots should be in normal cube order", () => {
       const horizontalDots = screen.getByTestId("horizontal-sub-dots");
       const dots = horizontalDots.querySelectorAll(".nav-dots__dot");
-      // Dots are rendered in reversed order: Cube 3, Cube 2, Cube 1 (left to right)
+      // Dots are rendered in normal order: Cube 1, Cube 2, Cube 3 (left to right)
       expect(dots.length).toBe(3);
-      expect(dots[0].getAttribute("aria-label")).toBe("Cube 3");
+      expect(dots[0].getAttribute("aria-label")).toBe("Cube 1");
       expect(dots[1].getAttribute("aria-label")).toBe("Cube 2");
-      expect(dots[2].getAttribute("aria-label")).toBe("Cube 1");
+      expect(dots[2].getAttribute("aria-label")).toBe("Cube 3");
     });
   });
 

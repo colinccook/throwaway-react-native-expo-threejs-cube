@@ -35,9 +35,9 @@ Feature: Three Rotating Cubes with Swipable Views
     Given the app has loaded
     Then I should see the page title overlay
 
-  Scenario: The horizontal sub-dots are rendered in reversed order
+  Scenario: The horizontal sub-dots are rendered in normal order
     Given the app has loaded
-    Then the horizontal sub-dots should be in reversed cube order
+    Then the horizontal sub-dots should be in normal cube order
 
   Scenario: The page title uses a sci-fi font class
     Given the app has loaded

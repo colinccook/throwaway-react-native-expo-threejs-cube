@@ -355,7 +355,7 @@ export default function App() {
         ))}
       </div>
 
-      {/* Navigation dots — 3 vertical dots, bottom dot has horizontal sub-dots */}
+      {/* Navigation dots — 2 vertical dots + 1 row of 3 horizontal dots */}
       <nav
         data-testid="nav-dots"
         className="nav-dots"
@@ -370,23 +370,16 @@ export default function App() {
           </div>
         ))}
 
-        {/* Bottom dot — cube focus — with horizontal sub-dots */}
+        {/* Bottom position — 3 horizontal dots, one per cube */}
         <div className="nav-dots__item">
-          <div
-            className={`nav-dots__dot${isOnCubeFocusPage ? " nav-dots__dot--active" : ""}`}
-            aria-label="Cube focus"
-          />
           <div data-testid="horizontal-sub-dots" className="nav-dots__horizontal">
-            {Array.from({ length: TOTAL_CUBES }, (_, i) => {
-              const reversedCubeIndex = TOTAL_CUBES - 1 - i;
-              return (
-                <div
-                  key={reversedCubeIndex}
-                  className={`nav-dots__dot${isOnCubeFocusPage && subX === reversedCubeIndex ? " nav-dots__dot--active" : ""}`}
-                  aria-label={`Cube ${reversedCubeIndex + 1}`}
-                />
-              );
-            })}
+            {Array.from({ length: TOTAL_CUBES }, (_, i) => (
+              <div
+                key={i}
+                className={`nav-dots__dot${isOnCubeFocusPage && subX === i ? " nav-dots__dot--active" : ""}`}
+                aria-label={`Cube ${i + 1}`}
+              />
+            ))}
           </div>
         </div>
       </nav>
