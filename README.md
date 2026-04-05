@@ -23,8 +23,12 @@ A Progressive Web App that renders three rotating 3D cubes using React, Three.js
 | 1 | Top view | Bird's-eye overhead view |
 | 2 | Cube focus | Camera zooms to a cube; swipe **left/right** to move between cubes |
 
-- **Page title overlay** — white text in the top-left corner showing the current view name; animates up/down with vertical swipes and left/right with horizontal swipes on the cube focus page  
-- **Navigation dots** — three vertical dots on the right edge; the bottom dot has three horizontal sub-dots indicating left/right cube navigation  
+- **Page title overlay** — sci-fi styled text in the top-left corner using the **Orbitron** font with a cyan neon glow effect; titles type in character-by-character with electronic beeping sounds when arriving at a new page, and fade out during scrolling  
+- **Navigation dots** — three vertical dots on the right edge with a cyan colour scheme; the active dot slowly strobes between dim and bright cyan; the bottom dot has three horizontal sub-dots indicating left/right cube navigation  
+- **Sci-fi sound effects** — synthesised via the Web Audio API (no audio files):
+  - Swipe drag produces a rising filtered-noise bed that builds with drag distance
+  - Successful page transitions trigger a "whoosh" swish sound
+  - Title type-in animation plays short electronic beeps per character  
 - **Assertive, smooth camera tweening** — the camera follows your finger in real time; releasing mid-swipe snaps back or advances based on threshold  
 - **SCSS styling** — global reset and component styles in `src/styles/`
 
@@ -45,6 +49,8 @@ A Progressive Web App that renders three rotating 3D cubes using React, Three.js
 ├── src/
 │   ├── main.tsx                # React entry point (imports global.scss)
 │   ├── App.tsx                 # Swipable interface, gesture handling, nav dots, FPS overlay
+│   ├── audio/
+│   │   └── sfx.ts              # Web Audio API sound engine (beeps, swish, swipe noise)
 │   ├── components/
 │   │   ├── ThreeScene.tsx      # Three.js scene: 3 cubes, camera views, FPS tracking
 │   │   └── SpinningCube.tsx    # (legacy) Original single-cube component
@@ -134,6 +140,9 @@ Feature: Three Rotating Cubes with Swipable Views
   Scenario: The horizontal sub-dots are visible after the app loads
   Scenario: The page title overlay is visible
   Scenario: The horizontal sub-dots are rendered in reversed order
+  Scenario: The page title uses a sci-fi font class
+  Scenario: The active navigation dot has the strobing class
+  Scenario: Swipe sounds are triggered during drag gestures
 ```
 
 ## Instructions for Future Prompting
