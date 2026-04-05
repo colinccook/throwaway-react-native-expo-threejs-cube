@@ -24,7 +24,7 @@ A Progressive Web App that renders three rotating 3D cubes using React, Three.js
 | 2 | Cube focus | Camera zooms to a cube; swipe **left/right** to move between cubes |
 
 - **Page title overlay** — sci-fi styled text in the top-left corner using the **Orbitron** font with a cyan neon glow effect; titles type in character-by-character with electronic beeping sounds when arriving at a new page, and fade out during scrolling  
-- **Navigation dots** — three vertical dots on the right edge with a cyan colour scheme; the active dot slowly strobes between dim and bright cyan; the bottom dot has three horizontal sub-dots indicating left/right cube navigation  
+- **Navigation dots** — two vertical dots plus a row of three horizontal dots on the right edge with a cyan colour scheme; the active dot slowly strobes between dim and bright cyan; the bottom row of three horizontal dots represents the three cubes (left/right swipeable), defaulting to the leftmost cube and remembering the selected cube when navigating away and back  
 - **Sci-fi sound effects** — synthesised via the Web Audio API (no audio files):
   - Swipe drag produces a rising filtered-noise bed that builds with drag distance
   - Successful page transitions trigger a "whoosh" swish sound
@@ -139,7 +139,7 @@ Feature: Three Rotating Cubes with Swipable Views
   Scenario: Swiping up advances to the top view
   Scenario: The horizontal sub-dots are visible after the app loads
   Scenario: The page title overlay is visible
-  Scenario: The horizontal sub-dots are rendered in reversed order
+  Scenario: The horizontal sub-dots are rendered in normal order
   Scenario: The page title uses a sci-fi font class
   Scenario: The active navigation dot has the strobing class
   Scenario: Swipe sounds are triggered during drag gestures
