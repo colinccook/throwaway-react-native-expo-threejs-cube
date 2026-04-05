@@ -15,6 +15,11 @@ const SNAP_EASING_FACTOR = 0.13;
 
 const TOTAL_PAGES = 3; // 0=side, 1=top, 2=cube-focus
 const TOTAL_CUBES = 3;
+
+/** Delay before the typing reveal starts, giving the snap animation time to settle */
+const TYPING_START_DELAY_MS = 150;
+/** Interval between revealing each character in the title typing animation */
+const TYPING_CHAR_INTERVAL_MS = 55;
 const CUBE_FOCUS_PAGE = TOTAL_PAGES - 1; // 2
 
 /** Titles for vertical pages (non-cube) */
@@ -284,8 +289,8 @@ export default function App() {
           typingIntervalRef.current = null;
           el.style.clipPath = "none";
         }
-      }, 55);
-    }, 150);
+      }, TYPING_CHAR_INTERVAL_MS);
+    }, TYPING_START_DELAY_MS);
 
     return () => {
       if (typingDelayRef.current) {

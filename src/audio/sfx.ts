@@ -135,7 +135,8 @@ export function stopSwipeSound(didTransition: boolean): void {
   }
   if (swipeSrc) {
     try {
-      swipeSrc.stop(c ? c.currentTime + 0.1 : 0);
+      if (c) swipeSrc.stop(c.currentTime + 0.1);
+      else swipeSrc.stop();
     } catch {
       /* already stopped */
     }
