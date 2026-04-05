@@ -13,6 +13,9 @@ import "./styles/app.scss";
 /** Easing factor for the snap-to-page animation (per requestAnimationFrame tick) */
 const SNAP_EASING_FACTOR = 0.13;
 
+/** Minimum velocity (px/ms) required to trigger a fling page transition */
+const FLING_VELOCITY_THRESHOLD = 0.3;
+
 const TOTAL_PAGES = 3; // 0=side, 1=top, 2=cube-focus
 const TOTAL_CUBES = 3;
 
@@ -73,6 +76,11 @@ export default function App() {
     axis: null as "vertical" | "horizontal" | null,
     startPageY: 0,
     startSubX: 0,
+    lastX: 0,
+    lastY: 0,
+    lastTime: 0,
+    velX: 0,  // px/ms, smoothed
+    velY: 0,  // px/ms, smoothed
   });
 
   const onDragStart = useCallback(
@@ -90,6 +98,11 @@ export default function App() {
         axis: null,
         startPageY: pageY,
         startSubX: subX,
+        lastX: clientX,
+        lastY: clientY,
+        lastTime: Date.now(),
+        velX: 0,
+        velY: 0,
       };
     },
     [pageY, subX]
@@ -107,6 +120,18 @@ export default function App() {
       if (!g.axis && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
         g.axis = Math.abs(dy) >= Math.abs(dx) ? "vertical" : "horizontal";
       }
+
+      // Track instantaneous velocity with exponential smoothing (α=0.5)
+      const now = Date.now();
+      const dt = now - g.lastTime;
+      if (dt > 0) {
+        const alpha = 0.5;
+        g.velX = alpha * (clientX - g.lastX) / dt + (1 - alpha) * g.velX;
+        g.velY = alpha * (clientY - g.lastY) / dt + (1 - alpha) * g.velY;
+      }
+      g.lastX = clientX;
+      g.lastY = clientY;
+      g.lastTime = now;
 
       if (g.axis === "vertical") {
         // Swiping up (dy < 0) advances pages (TikTok-style: 0 → 1 → 2)
@@ -137,16 +162,28 @@ export default function App() {
     let didTransition = false;
 
     if (g.axis === "vertical") {
-      const snapped = Math.round(
+      let snapped = Math.round(
         Math.max(0, Math.min(TOTAL_PAGES - 1, verticalTRef.current))
       );
+      // Fling override: if velocity exceeds threshold, advance one page in the
+      // fling direction even if the finger didn't travel the full 50% distance
+      if (Math.abs(g.velY) >= FLING_VELOCITY_THRESHOLD) {
+        const flingDir = g.velY < 0 ? 1 : -1; // velY<0 = finger moving up = advance
+        snapped = Math.max(0, Math.min(TOTAL_PAGES - 1, g.startPageY + flingDir));
+      }
       didTransition = snapped !== g.startPageY;
       targetVRef.current = snapped;
       setPageY(snapped);
     } else if (g.axis === "horizontal") {
-      const snapped = Math.round(
+      let snapped = Math.round(
         Math.max(0, Math.min(TOTAL_CUBES - 1, horizontalTRef.current))
       );
+      // Fling override: if velocity exceeds threshold, advance one cube in the
+      // fling direction even if the finger didn't travel the full 50% distance
+      if (Math.abs(g.velX) >= FLING_VELOCITY_THRESHOLD) {
+        const flingDir = g.velX < 0 ? 1 : -1; // velX<0 = finger moving left = advance
+        snapped = Math.max(0, Math.min(TOTAL_CUBES - 1, g.startSubX + flingDir));
+      }
       didTransition = snapped !== g.startSubX;
       targetHRef.current = snapped;
       setSubX(snapped);
