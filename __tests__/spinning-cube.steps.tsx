@@ -225,5 +225,36 @@ defineFeature(feature, (test) => {
       expect(sfx.stopSwipeSound).toHaveBeenCalled();
     });
   });
+
+  test("A quick fling gesture advances the page without large movement", ({ given, when, then }) => {
+    given("the app has loaded", () => {
+      render(<App />);
+    });
+
+    when("I perform a quick fling upward", () => {
+      // Simulate a fast fling: small finger movement (50px) in a short time (50ms).
+      // Without fling detection this would NOT advance the page (50/768 ≈ 0.065 rounds to 0).
+      // With fling detection: velY = α*(−50/50) + (1−α)*0 = 0.5*(−1) = −0.5 px/ms,
+      // |velY| = 0.5 ≥ 0.3 threshold → page transition triggered.
+      const dateSpy = jest.spyOn(Date, "now");
+      dateSpy.mockReturnValueOnce(1000); // onDragStart: initialise lastTime
+      dateSpy.mockReturnValueOnce(1050); // onDragMove: compute dt (50 ms)
+      dateSpy.mockReturnValue(1050);     // any subsequent calls
+
+      const app = screen.getByTestId("app");
+      fireEvent.touchStart(app, { touches: [{ clientX: 200, clientY: 600 }] });
+      fireEvent.touchMove(app, { touches: [{ clientX: 200, clientY: 550 }] }); // only 50px up
+      fireEvent.touchEnd(app);
+
+      dateSpy.mockRestore();
+    });
+
+    then("the vertical scroll position should be greater than 0", () => {
+      const sideDot = screen.getByLabelText("Side view");
+      const topDot = screen.getByLabelText("Top view");
+      expect(sideDot.classList.contains("nav-dots__dot--active")).toBe(false);
+      expect(topDot.classList.contains("nav-dots__dot--active")).toBe(true);
+    });
+  });
 });
 

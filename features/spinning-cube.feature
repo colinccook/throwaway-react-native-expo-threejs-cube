@@ -51,3 +51,8 @@ Feature: Three Rotating Cubes with Swipable Views
     Given the app has loaded
     When I begin a swipe gesture
     Then the swipe sound functions should have been called
+
+  Scenario: A quick fling gesture advances the page without large movement
+    Given the app has loaded
+    When I perform a quick fling upward
+    Then the vertical scroll position should be greater than 0
